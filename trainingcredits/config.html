@@ -1,0 +1,37 @@
+<?php
+	$usehtmleditor = can_use_html_editor();
+?>
+<script type="text/javascript">
+    //<![CDATA[
+    function senddata(this){
+        <?php if ($usehtmleditor && @$CFG->defaulthtmleditor == 'htmlarea') echo "this.form.onsubmit();\n"; ?>
+    }
+</script>
+<table cellspacing="0" cellpadding="5" border="0" class="boxaligncenter">
+<tr>
+<th colspan="2" scope="col">
+    <?php print_string('creditsmanagement', 'enrol_trainingcredits') ?>
+</th>
+</tr>
+<tr>
+    <td>
+    	<?php  
+    		print_string('creditinstructions', 'enrol_trainingcredits');
+           	print_textarea($usehtmleditor, 10, 50, 600, 400, 'trainingcredits_creditsinstructions', @$CFG->trainingcredits_creditsinstructions);
+        ?>      
+    </td>
+</tr>
+<tr>
+    <td>
+    	<?php  
+    		$usercreditsupdatestr = get_string('backmanageusercredits', 'enrol_trainingcredits');
+    		echo "<a href=\"{$CFG->wwwroot}/enrol/trainingcredits/usercredits.php\">$usercreditsupdatestr</a>";
+        ?>      
+    </td>
+</tr>
+</table>
+<?php
+    if ($usehtmleditor) {
+        use_html_editor('trainingcredits_creditsinstructions');
+    }
+?>
