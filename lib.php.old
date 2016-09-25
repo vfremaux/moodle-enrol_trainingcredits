@@ -1,0 +1,288 @@
+<?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+defined('MOODLE_INTERNAL') || die();
+
+/**
+ * Adds instance form
+ *
+ * @package   enrol_trainingcredits
+ * @category  enrol
+ * @author    Valery Fremaux <valery.fremaux@gmail.com>
+ * @copyright 2015 Valery Fremaux {@link http://www.mylearningfactory.com}
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+require_once($CFG->dirroot.'/group/lib.php');
+
+/**
+* enrolment_plugin_trainingcredits class
+*/
+
+class enrol_trainingcredits_plugin extends enrol_plugin {
+
+    var $errormsg;
+
+    /**
+     * Returns localised name of enrol instance.
+     *
+     * @param stdClass $instance (null is accepted too)
+     * @return string
+     */
+    public function get_instance_name($instance) {
+        global $DB;
+
+        if (empty($instance)) {
+            $enrol = $this->get_name();
+            return get_string('pluginname', 'enrol_'.$enrol);
+        } elseif (empty($instance->name)) {
+            $enrol = $this->get_name();
+            return get_string('pluginname', 'enrol_'.$enrol);
+        } else {
+            return format_string($instance->name, true, array('context' => context_course::instance($instance->courseid)));
+        }
+    }
+
+    /**
+     * Returns link to page which may be used to add new instance of enrolment plugin in course.
+     * @param int $courseid
+     * @return moodle_url page url
+     */
+    public function get_newinstance_link($courseid) {
+        $context = context_course::instance($courseid, MUST_EXIST);
+
+        if (!has_capability('moodle/course:enrolconfig', $context) or !has_capability('enrol/trainingcredits:config', $context)) {
+            return NULL;
+        }
+
+        // Multiple instances supported - distinctcosts for several roles.
+        return new moodle_url('/enrol/trainingcredits/edit.php', array('courseid' => $courseid));
+    }
+
+    /**
+    * Prints the entry form/page for this enrolment
+    *
+    * This is only called from course/enrol.php
+    * Most plugins will probably override this to print payment
+    * forms etc, or even just a notice to say that manual enrolment
+    * is disabled
+    *
+    * @param    course  current course object
+    */
+    function print_entry($course) {
+        global $CFG, $USER, $SESSION, $THEME, $COURSE, $OUTPUT;
+
+        $strloginto = get_string('loginto', '', $course->shortname);
+        $strcourses = get_string('courses');
+
+        // Automatically enrol into courses without password
+
+        $context = context_course::instance($COURSE->id);
+
+        if ($course->password == '') {   // no password, so enrol
+
+            // real trap for uncredited users
+            $usercredits = $DB->get_field('trainingcredits', 'coursecredits', array('userid' => $USER->id));
+            if ($usercredits == 0 || ($usercredits < $course->cost)){
+                $a->usercredits = 0 + $usercredits;
+                $a->required = 0 + $this-> - $usercredits;
+                $creditstr =  ($usercredits) ? get_string('nocreditsleft', 'enrol_trainingcredits', $a) : get_string('nocredits', 'enrol_trainingcredits', $a) ;
+                $PAGE->setContext($context);
+                $PAGE->setHeading($strloginto);
+                echo $OUTPUT->header();
+                echo '<br />';
+                notify($creditstr);
+                print_continue($CFG->wwwroot);
+                if (!empty($CFG->trainingcredits_creditsinstructions)){
+                    print_box_start();
+                    print_heading(get_string('gettingcredits', 'enrol_trainingcredits'), 3);
+                    echo filter_string($CFG->trainingcredits_creditsinstructions);
+                }
+                print_footer();
+                exit;
+            }
+
+            // /real trap for uncredited users
+
+            if (isguestuser()) {
+    
+            } else if (empty($_GET['confirm']) && empty($_GET['cancel'])) {
+    
+                echo $OUTPUT->header();
+                echo '<br />';
+                $a->usercredits = $usercredits;
+                $a->cost = $course->cost;
+                $a->creditsleft = $usercredits - $course->cost;
+                notice_yesno(get_string('enrolmentconfirmation', 'enrol_trainingcredits', $a), "enrol.php?id=$course->id&amp;confirm=1&amp;sesskey=".sesskey(),
+                                                                  "enrol.php?id=$course->id&amp;cancel=1");
+                print_footer();
+                exit;
+
+            } else if (!empty($_GET['confirm']) and confirm_sesskey()) {
+
+                if (!enrol_into_course($course, $USER, 'manual')) {
+                    print_error('couldnotassignrole');
+                }
+
+                // burn required credits
+                $oldcredits = get_field('trainingcredits', 'coursecredits', 'userid', $USER->id);
+                set_field('trainingcredits', 'coursecredits', $oldcredits - $course->cost, 'userid', $USER->id);
+
+                // force a refresh of mycourses
+                unset($USER->mycourses);
+
+                if (!empty($SESSION->wantsurl)) {
+                    $destination = $SESSION->wantsurl;
+                    unset($SESSION->wantsurl);
+                } else {
+                    $destination = "$CFG->wwwroot/course/view.php?id=$course->id";
+                }
+
+                redirect($destination);
+
+            } else if (!empty($_GET['cancel'])) {
+                unset($SESSION->wantsurl);
+                if (!empty($SESSION->enrolcancel)) {
+                    $destination = $SESSION->enrolcancel;
+                    unset($SESSION->enrolcancel);
+                } else {
+                    $destination = $CFG->wwwroot;
+                }
+                redirect($destination);
+            }
+        }
+
+        // if we get here we are going to display the form asking for the enrolment key
+        // and (hopefully) provide information about who to ask for it.
+        if (!isset($password)) {
+            $password = '';
+        }
+        
+    }
+
+    /**
+    * The other half to print_entry, this checks the form data
+    *
+    * This function checks that the user has completed the task on the
+    * enrolment entry page and then enrolls them.
+    *
+    * @param    form    the form data submitted, as an object
+    * @param    course  the current course, as an object
+    */
+    function check_entry($form, $course) {
+        global $CFG, $USER, $SESSION, $THEME;
+
+        if (empty($form->password)) {
+            $form->password = '';
+        }
+    
+        if (empty($course->password) or !confirm_sesskey()) {
+            // do not allow entry when no course password set
+            // automatic login when manual primary, no login when secondary at all!!
+            error('illegal enrolment attempted');
+        }
+
+        $groupid = $this->check_group_entry($course->id, $form->password);
+
+        if ((stripslashes($form->password) == $course->password) or ($groupid !== false) ) {
+
+            if (isguestuser()) { // only real user guest, do not use this for users with guest role
+                $USER->enrolkey[$course->id] = true;
+                //add_to_log($course->id, 'course', 'guest', 'view.php?id='.$course->id, getremoteaddr());
+
+            } else {  /// Update or add new enrolment
+                // this method will not burn credits, allowing password 
+                // owners to get in anyway.
+                if (enrol_into_course($course, $USER, 'trainingcredits')) {
+                    // force a refresh of mycourses
+                    unset($USER->mycourses);
+                    if ($groupid !== false) {
+                        if (!groups_add_member($groupid, $USER->id)) {
+                            print_error('couldnotassigngroup');
+                        }
+                    }
+                } else {
+                    print_error('couldnotassignrole');
+                }
+            }
+
+            if ($SESSION->wantsurl) {
+                $destination = $SESSION->wantsurl;
+                unset($SESSION->wantsurl);
+            } else {
+                $destination = "$CFG->wwwroot/course/view.php?id=$course->id";
+            }
+
+            redirect($destination);
+
+        } else if (!isset($CFG->enrol_manual_showhint) or $CFG->enrol_manual_showhint) {
+            $this->errormsg = get_string('enrolmentkeyhint', '', substr($course->password, 0, 1));
+    
+        } else {
+            $this->errormsg = get_string('enrolmentkeyerror', 'enrol_manual');
+        }
+    }
+
+    /**
+    * Check if the given enrolment key matches a group enrolment key for the given course
+    *
+    * @param    courseid  the current course id
+    * @param    password  the submitted enrolment key
+    */
+    function check_group_entry ($courseid, $password) {
+
+        if ($groups = groups_get_all_groups($courseid)) {
+            foreach ($groups as $group) {
+                if ( !empty($group->enrolmentkey) and (stripslashes($password) == $group->enrolmentkey) ) {
+                    return $group->id;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+    * Returns the relevant icons for a course
+    *
+    * @param    course  the current course, as an object
+    */
+    function get_access_icons($course) {
+        global $CFG;
+    
+        global $strallowguests;
+        global $strrequireskey;
+    
+        if (empty($strallowguests)) {
+            $strallowguests = get_string('allowguests');
+            $strrequireskey = get_string('requireskey');
+        }
+    
+        $str = '';
+    
+        if (!empty($course->guest)) {
+            $str .= '<a title="'.$strallowguests.'" href="'.$CFG->wwwroot.'/course/view.php?id='.$course->id.'">';
+            $str .= '<img class="accessicon" alt="'.$strallowguests.'" src="'.$CFG->pixpath.'/i/guest.gif" /></a>&nbsp;&nbsp;';
+        }
+        if (!empty($course->password)) {
+            $str .= '<a title="'.$strrequireskey.'" href="'.$CFG->wwwroot.'/course/view.php?id='.$course->id.'">';
+            $str .= '<img class="accessicon" alt="'.$strrequireskey.'" src="'.$CFG->pixpath.'/i/key.gif" /></a>';
+        }
+    
+        return $str;
+    }
+
+} /// end of class
