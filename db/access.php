@@ -45,33 +45,5 @@ $capabilities = array(
         )
     ),
 
-    /* Enrol anybody. */
-    'enrol/trainingcredits:enrol' => array(
-        'captype' => 'write',
-        'contextlevel' => CONTEXT_COURSE,
-        'archetypes' => array(
-            'manager' => CAP_ALLOW,
-            'editingteacher' => CAP_ALLOW,
-        )
-    ),
-
-    /* Unenrol anybody (including self) - watch out for data loss. */
-    'enrol/trainingcredits:unenrol' => array(
-        'captype' => 'write',
-        'contextlevel' => CONTEXT_COURSE,
-        'archetypes' => array(
-            'manager' => CAP_ALLOW,
-            'editingteacher' => CAP_ALLOW,
-        )
-    ),
-
-    /* Unenrol self - watch out for data loss. */
-    'enrol/trainingcredits:unenrolself' => array(
-        'captype' => 'write',
-        'contextlevel' => CONTEXT_COURSE,
-        'archetypes' => array(
-        )
-    ),
-
 );
 
