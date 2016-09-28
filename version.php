@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version details.
+ * Version detail.
  *
  * @package   enrol_trainingcredits
  * @category  enrol
@@ -26,11 +26,11 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version  = 2015103002;   // This module's version.
-$plugin->requires = 2014041100;   // Requires this Moodle version.
+$plugin->version  = 2015103002;   // This module's version
+$plugin->requires = 2015050500;   // Requires this Moodle version
 $plugin->component = 'enrol_trainingcredits';
 $plugin->maturity = MATURITY_BETA;
-$plugin->release = '2.8.0 (Build 2015103000)';
+$plugin->release = '2.9.0 (Build 2015103002)';
 
 // Non moodle attributes.
-$plugin->codeincrement = '2.8.0000';
+$plugin->codeincrement = '2.9.0000';
