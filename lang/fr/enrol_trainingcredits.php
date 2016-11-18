@@ -7,6 +7,10 @@ $string['backmanageusercredits'] = 'Gérer les crédits utilisateur';
 $string['clearfilter'] = 'Supprimer le filtre';
 $string['creditinstructions'] = 'Texte d\'instructions pour obtenir des crédits';
 $string['credits'] = 'Crédits de <b>$a->user</b> : ';
+$string['creditcost'] = 'Credits nécessaires';
+$string['assignrole'] = 'Rôle à assigner';
+$string['addgroup'] = 'Ajouter au groupe';
+$string['status'] = 'Activer l\'inscription par crédits';
 $string['creditsmanagement'] = 'Gestion des crédits';
 $string['description'] = 'Cette méthode permet une inscription directe si l\'utilisateur dispose de suffisamment de credits à consommer dans son compte';
 $string['editusercredits'] = 'Editer les crédits des utilisateurs';
@@ -18,6 +22,7 @@ $string['nocreditsleft'] = 'Désolé, il vous manque $a->required crédits pour 
 $string['pluginname'] = 'Inscription par crédits pédagogiques';
 $string['setfilter'] = 'Enregistrer le filtre';
 $string['setusercredits'] = 'Modification des crédits utilisateur';
+$string['maxenrolledreached'] = 'Trop d\'utilisateurs ont été inscrits dans ce cours.';
 $string['creditused_mail'] = '
 <%%SITE%%> courseware
 -------------------------------------

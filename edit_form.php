@@ -28,7 +28,7 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once("$CFG->libdir/formslib.php");
 
-class enrol_delayedcohort_edit_form extends moodleform {
+class enrol_trainingcredits_edit_form extends moodleform {
 
     function definition() {
         global $CFG, $DB;
@@ -38,7 +38,7 @@ class enrol_delayedcohort_edit_form extends moodleform {
         list($instance, $plugin, $course) = $this->_customdata;
         $coursecontext = context_course::instance($course->id);
 
-        $enrol = enrol_get_plugin('delayedcohort');
+        $enrol = enrol_get_plugin('trainingcredits');
 
         $groups = array(0 => get_string('none'));
         foreach (groups_get_all_groups($course->id) as $group) {
@@ -48,23 +48,20 @@ class enrol_delayedcohort_edit_form extends moodleform {
         $mform->addElement('hidden', 'return');
         $mform->setType('return', PARAM_TEXT);
 
-        $mform->addElement('hidden', 'category');
-        $mform->setType('category', PARAM_INT);
-
-        $mform->addElement('header','general', get_string('pluginname', 'enrol_delayedcohort'));
+        $mform->addElement('header','general', get_string('pluginname', 'enrol_trainingcredits'));
 
         $mform->addElement('text', 'name', get_string('custominstancename', 'enrol'), 'size="80"');
         $mform->setType('name', PARAM_TEXT);
 
         $options = array(ENROL_INSTANCE_ENABLED  => get_string('yes'),
                          ENROL_INSTANCE_DISABLED => get_string('no'));
-        $mform->addElement('select', 'status', get_string('status', 'enrol_delayedcohort'), $options);
+        $mform->addElement('select', 'status', get_string('status', 'enrol_trainingcredits'), $options);
 
         if ($instance->id) {
             if ($cohort = $DB->get_record('cohort', array('id' => $instance->customint1))) {
                 $cohorts = array($instance->customint1=>format_string($cohort->name, true, array('context' => context::instance_by_id($cohort->contextid))));
             } else {
-                $cohorts = array($instance->customint1=>get_string('error'));
+                $cohorts = array($instance->customint1 => get_string('error'));
             }
             $mform->addElement('select', 'customint1', get_string('cohort', 'cohort'), $cohorts);
             $mform->setConstant('customint1', $instance->customint1);
@@ -88,13 +85,12 @@ class enrol_delayedcohort_edit_form extends moodleform {
             }
             $rs->close();
             $mform->addElement('select', 'customint1', get_string('cohort', 'cohort'), $cohorts);
-            $mform->addRule('customint1', get_string('required'), 'required', null, 'client');
         }
 
         $roles = get_assignable_roles($coursecontext);
         $roles[0] = get_string('none');
         $roles = array_reverse($roles, true); // Descending default sortorder.
-        $mform->addElement('select', 'roleid', get_string('assignrole', 'enrol_delayedcohort'), $roles);
+        $mform->addElement('select', 'roleid', get_string('assignrole', 'enrol_trainingcredits'), $roles);
         $mform->setDefault('roleid', $enrol->get_config('roleid'));
         if ($instance->id and !isset($roles[$instance->roleid])) {
             if ($role = $DB->get_record('role', array('id' => $instance->roleid))) {
@@ -104,14 +100,17 @@ class enrol_delayedcohort_edit_form extends moodleform {
                 $roles[$instance->roleid] = get_string('error');
             }
         }
-        $mform->addElement('select', 'customint2', get_string('addgroup', 'enrol_delayedcohort'), $groups);
 
-        $mform->addElement('date_time_selector', 'customint3', get_string('triggerdate', 'enrol_delayedcohort'), array('optional' => true));
+        $mform->addElement('select', 'customint2', get_string('addgroup', 'enrol_trainingcredits'), $groups);
 
-        $mform->addElement('date_time_selector', 'customint4', get_string('enddate', 'enrol_delayedcohort'), array('optional' => true));
+        $mform->addElement('text', 'customint3', get_string('creditcost', 'enrol_trainingcredits'));
+        $mform->setType('customint3', PARAM_INT);
 
-        $mform->addElement('checkbox', 'customchar1', get_string('unenrolonend', 'enrol_delayedcohort'));
-        $mform->disabledIf('customchar1', 'customint4', 'eq', '0');
+        $mform->addElement('text', 'customint4', get_string('maxenroled', 'enrol_trainingcredits'), array('optional' => true));
+        $mform->setType('customint4', PARAM_INT);
+
+        $mform->addelement('checkbox', 'customint5', get_string('sendwelcomemessage', 'enrol_trainingcredits'));
+        $mform->setType('customint5', PARAM_BOOL);
 
         $mform->addElement('hidden', 'courseid', null);
         $mform->setType('courseid', PARAM_INT);
@@ -134,8 +133,8 @@ class enrol_delayedcohort_edit_form extends moodleform {
         $errors = parent::validation($data, $files);
 
         $params = array('roleid' => $data['roleid'], 'customint1' => $data['customint1'], 'courseid' => $data['courseid'], 'id' => $data['id']);
-        if ($DB->record_exists_select('enrol', "roleid = :roleid AND customint1 = :customint1 AND courseid = :courseid AND enrol = 'delayedcohort' AND id <> :id", $params)) {
-            $errors['roleid'] = get_string('instanceexists', 'enrol_delayedcohort');
+        if ($DB->record_exists_select('enrol', "roleid = :roleid AND customint1 = :customint1 AND courseid = :courseid AND enrol = 'trainingcredits' AND id <> :id", $params)) {
+            $errors['roleid'] = get_string('instanceexists', 'enrol_trainingcredits');
         }
 
         return $errors;
