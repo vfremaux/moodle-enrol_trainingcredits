@@ -27,10 +27,10 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->version  = 2015103004;   // This module's version.
-$plugin->requires = 2015111000;   // Requires this Moodle version.
+$plugin->requires = 2016052300;   // Requires this Moodle version.
 $plugin->component = 'enrol_trainingcredits';
-$plugin->maturity = MATURITY_BETA;
-$plugin->release = '3.0.0 (Build 2015103000)';
+$plugin->maturity = MATURITY_ALPHA;
+$plugin->release = '3.1.0 (Build 2015103004)';
 
 // Non moodle attributes.
-$plugin->codeincrement = '3.0.0000';
+$plugin->codeincrement = '3.1.0000';
