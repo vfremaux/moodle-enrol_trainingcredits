@@ -709,9 +709,9 @@ class enrol_trainingcredits_plugin extends enrol_manual_plugin {
         // Check credit restrictions
         $credits = $DB->get_record('enrol_trainingcredits', array('userid' => $USER->id));
 
-        if (!$credits || (!$instance->customint3 > $credits->coursecredits)) {
+        if (!$instance->customint3 > $credits->coursecredits) {
             // Not enough credits in account.
-            return get_string('cantenrol', 'enrol_trainingcredits');
+            return get_string('canntenrol', 'enrol_trainingcredits');
         }
 
         // Check max enrollimit restriction.

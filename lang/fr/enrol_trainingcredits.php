@@ -35,7 +35,6 @@ $string['addgroup'] = 'Ajouter au groupe';
 $string['assignrole'] = 'Rôle à assigner';
 $string['back'] = 'Revenir';
 $string['backmanageusercredits'] = 'Gérer les crédits utilisateur';
-$string['cantenrol'] = 'Vous ne pouvez pas vous inscrire dans ce cours (pas de crédits disponible)';
 $string['clearfilter'] = 'Supprimer le filtre';
 $string['creditcost'] = 'Credits nécessaires';
 $string['creditinstructions'] = 'Texte d\'instructions pour obtenir des crédits';

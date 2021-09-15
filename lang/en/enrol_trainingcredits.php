@@ -37,7 +37,6 @@ $string['addgroup'] = 'Add to group';
 $string['assignrole'] = 'Role to assign';
 $string['back'] = 'Browse back';
 $string['backmanageusercredits'] = 'Manage user credits';
-$string['cantenrol'] = 'You cannot enrol in this course (no available learning credits)';
 $string['clearfilter'] = 'Erase filter';
 $string['creditcost'] = 'Credits needed';
 $string['creditinstructions'] = 'Instructions text for getting credits';
