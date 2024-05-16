@@ -34,3 +34,4 @@ $plugin->release = '4.1.0 (Build 2020010700)';
 
 // Non moodle attributes.
 $plugin->codeincrement = '4.1.0000';
+$plugin->privacy = 'public';
