@@ -27,10 +27,11 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->version  = 2020010700;   // This module's version.
-$plugin->requires = 2018042700;   // Requires this Moodle version.
+$plugin->requires = 2022111800;   // Requires this Moodle version.
 $plugin->component = 'enrol_trainingcredits';
-$plugin->maturity = MATURITY_BETA;
-$plugin->release = '3.9.0 (Build 2020010700)';
+$plugin->maturity = MATURITY_RC;
+$plugin->release = '4.1.0 (Build 2020010700)';
 
 // Non moodle attributes.
-$plugin->codeincrement = '3.9.0000';
+$plugin->codeincrement = '4.1.0000';
+$plugin->privacy = 'public';
